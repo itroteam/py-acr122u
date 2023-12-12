@@ -12,14 +12,14 @@ logger = logging.getLogger(__name__)
 
 
 class Reader:
-    def __init__(self):
+    def __init__(self, reader_number=0):
         """create an ACR122U object
         doc available here: http://downloads.acs.com.hk/drivers/en/API-ACR122U-2.02.pdf"""
-        self.reader_name, self.connection = self.instantiate_reader()
+        self.reader_name, self.connection = self.instantiate_reader(reader_number)
         self.pn532 = self._PN532(self)
 
     @staticmethod
-    def instantiate_reader():
+    def instantiate_reader(reader_number):
         readers = smartcard.System.readers()
 
         logger.debug(f"Available readers: {readers}")
@@ -27,7 +27,7 @@ class Reader:
         if len(readers) == 0:
             raise error.NoReader("No readers available")
 
-        reader = readers[0]
+        reader = readers[reader_number]
         c = reader.createConnection()
 
         logger.info(f"Using reader {reader}")
@@ -84,6 +84,9 @@ class Reader:
         if [sw1, sw2] == option.answers.get("fail"):
             raise error.InstructionFailed(f"Instruction {mode} failed")
 
+        if [sw1, sw2] == option.answers.get("not_supported"):
+            raise error.InstructionFailed(f"Instruction {mode} not supported")
+
         logger.debug(f"Success: {mode}, result: {result}")
 
         if data:
@@ -113,6 +116,10 @@ class Reader:
     def get_uid(self):
         """get the uid of the card"""
         return self.command("get_uid")
+
+    def get_ats(self):
+        """get the uid of the card"""
+        return self.command("get_ats")
 
     def firmware_version(self):
         """get the firmware version of the reader"""
