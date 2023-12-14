@@ -38,6 +38,10 @@ class Reader:
         """connect to the card
         only works if a card is on the reader"""
         try:
+            # Connect using this protocol and mode
+            # self.connection.connect(protocol=CardConnection.RAW_protocol, mode=SCARD_SHARE_DIRECT)
+            # Connected to fake card...
+
             self.connection.connect()
             logger.debug("Reader connected")
         except:
