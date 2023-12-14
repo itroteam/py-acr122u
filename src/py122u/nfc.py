@@ -176,6 +176,22 @@ class Reader:
             "update_binary_blocks", [block_number, number_of_byte_to_update, block_data]
         )
 
+    def update_sector_auth_mifare(self, sector_num: int, key_value):
+        """
+
+        :param key_value: vettore di byte da scrivere come chiave. Deve essere lunga 6 byte
+        :param sector_num: numero del settore mifare. Ogni settore è formato da 4 blocchi e l'ultimo contiene la chave di
+        autenticazione
+        :return:
+        """
+        if len(key_value) != 6:
+            raise ValueError('La lunghezza deve essere di 6 byte (es: 6 caratteri ASCII)')
+
+        block_number = sector_num * 4 - 1
+        block_val = self.read_binary_blocks(block_number, 0x10)
+        new_block_val = block_val[0:10] + key_value
+        self.update_binary_blocks(block_number, 0x10, new_block_val)
+
     def create_value_block(self, block_number, value):
         """Create value block at given block number with given 4-byte signed long integer value
 
@@ -430,3 +446,4 @@ class Reader:
 
             data = self.command("in_auto_poll", arguments)
             return data
+
